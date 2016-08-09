@@ -3,9 +3,9 @@ from scrapy.selector import Selector
 from scrapy.linkextractors import LinkExtractor
 from scrapy.loader import ItemLoader
 
-
 from FFHelper.items import PlayerItem
-# TODO: check that final year in table is 2015(expected) otherwise skip player
+
+
     
 class FFToday(Spider):
     """Spider to get player data from FFtoday.com"""
@@ -62,7 +62,6 @@ class FFToday(Spider):
     rules = [Rule(LinkExtractor(allow=['/players/\d+']), 'parse', follow=True)]
     
     def parse(self, response):
-        """Docstring not yet implemented"""
         
         selector = Selector(response)
         loader = ItemLoader(item=PlayerItem(), selector = selector)

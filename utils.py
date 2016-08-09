@@ -1,4 +1,4 @@
-### Functions for use in FantasyFootballHelper.py
+### Functions for use in FantasyFootballHelper.py and FFHGUI.py
 
 import psycopg2
 import sys
@@ -6,6 +6,12 @@ import sys
 from FFHelper import security
 
 def connect_to_database():
+    """
+    Connects to a database specified using attributes the security.py file
+    returns a tuple of a database connection and a cursor within the database.
+    """
+
+
     connection = None
     
     try:
@@ -43,6 +49,10 @@ def defense_fixer(position):
     return position
     
 def get_player_from_table(player, table, cursor):
+    """
+    Selects entire row from table that matches player.
+    Not sure need the \ escape characters
+    """
     command = "SELECT * from %s where name = \'%s\'" % (table, name_fixer(player))
     cursor.execute(command)
     playerdata = cursor.fetchall()[0]
@@ -57,7 +67,10 @@ def remove_player_from_table(player, table_name, connection, cursor):
     except:
         connection.rollback()
         raise
-            
+
+#### Functions used on Cloneplayer table specifically so as not to damage permanent database ####
+#### Planned to be removed and functionality done in client to reduce stress on database     ####
+
 def get_player_position(player, cursor):
     command = "select position from cloneplayers where name = \'%s\'" % name_fixer(player)
     cursor.execute(command)
@@ -139,6 +152,8 @@ def get_players_from_position(position, cursor):
     data = cursor.fetchall()
     playerslist = [player for tuple in data for player in tuple]
     return playerslist
+
+###################################################################################################
     
 def get_top_values(table, select_columns, order_by, limit, cursor):
         """

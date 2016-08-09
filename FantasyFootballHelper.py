@@ -20,7 +20,7 @@ import utils
 
     
 class draftgame(object):
-    def __init__(self):  #add database, username, password arguments
+    def __init__(self):
         """
         initialises current_team
         Connects to the database
@@ -28,7 +28,7 @@ class draftgame(object):
         """
         
         self.current_team = {}
-        self.connection, self.cursor = utils.connect_to_database() # use database, username, password arguments 
+        self.connection, self.cursor = utils.connect_to_database()
         
         self.clone_table_column_creators = "id integer primary key, name varchar(100), player_url varchar(100), position varchar(100), age integer, current_team varchar(20), team_one_year_ago varchar(20), team_two_year_ago varchar(20), team_three_year_ago varchar(20), points_one_year_ago float, points_two_year_ago float, points_three_year_ago float"
         self.clone_table_columns = "id, name, player_url, position, age, current_team, team_one_year_ago, team_two_year_ago, team_three_year_ago, points_one_year_ago, points_two_year_ago, points_three_year_ago"
