@@ -55,8 +55,11 @@ def get_player_from_table(player, table, cursor):
     """
     command = "SELECT * from %s where name = \'%s\'" % (table, name_fixer(player))
     cursor.execute(command)
-    playerdata = cursor.fetchall()[0]
-    return playerdata
+    try:
+        playerdata = cursor.fetchall()[0]
+        return playerdata
+    except IndexError:
+        return None
     
 def remove_player_from_table(player, table_name, connection, cursor):
     assert (type(table_name) == type(player) == str)
@@ -68,8 +71,9 @@ def remove_player_from_table(player, table_name, connection, cursor):
         connection.rollback()
         raise
 
-#### Functions used on Cloneplayer table specifically so as not to damage permanent database ####
-#### Planned to be removed and functionality done in client to reduce stress on database     ####
+#### Functions used on Cloneplayer table specifically so as not to damage permanent database
+#### Planned to be removed and functionality done by instantiating player objects in client
+#### to reduce stress on database
 
 def get_player_position(player, cursor):
     command = "select position from cloneplayers where name = \'%s\'" % name_fixer(player)
@@ -193,7 +197,7 @@ def create_temporary_table(table_name, column_values, connection, cursor):
     except:
         connection.rollback()
         raise
-        
+
 def populate_temp_table_from_other_table(target_table, target_table_columns,
                                         other_table, filter_column,
                                         filter_value, connection, cursor):

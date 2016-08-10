@@ -1,5 +1,6 @@
 from Tkinter import *
 import tkSimpleDialog
+import tkMessageBox
 
 import FantasyFootballHelper
 import utils
@@ -296,7 +297,6 @@ class MainUI(Frame):
                 self.current_opponent_id += 1
                 self.increment_position()
             else:
-                print "USER PICK HAPPENS"
                 self.user_pick_logic()
                 self.increment_position()
 
@@ -326,19 +326,34 @@ class MainUI(Frame):
                 .format(self.game.currentround, self.game.currentposition))
 
         while not pickmade:
+            try:
 
-            if utils.get_player_position(pick, self.game.cursor) != None:
-                utils.remove_player_from_possible_players(pick, self.game.connection, self.game.cursor)
-                opponent = [opponent for opponent in self.game.opponents if opponent_id == opponent.id][0]
-                opponent.team.append(pick)
-                self.__MainUI()
-                pickmade = True
+                if utils.get_player_position(pick, self.game.cursor) != None:
+                    position = utils.get_player_position(pick, self.game.cursor).rstrip('0123456789 ').upper()
+                    if utils.get_player_from_table(pick, position, self.game.cursor) != None:
+                        utils.remove_player_from_possible_players(pick, self.game.connection, self.game.cursor)
+                        opponent = [opponent for opponent in self.game.opponents if opponent_id == opponent.id][0]
+                        opponent.team.append(pick)
+                        self.__MainUI()
+                        pickmade = True
+                    else:
+                        pick = tkSimpleDialog.askstring(
+                            "Opponent's pick",
+                            "Not a valid pick, please select again\nCurrent Pick: Round {0}: Pick {1}" \
+                                .format(self.game.currentround, self.game.currentposition))
 
-            else:
+                else:
+                    pick = tkSimpleDialog.askstring(
+                        "Opponent's pick",
+                        "Not a valid pick, please select again\nCurrent Pick: Round {0}: Pick {1}" \
+                            .format(self.game.currentround, self.game.currentposition))
+            except AttributeError:
+                tkMessageBox.showinfo("Error","Opponent must pick a valid player")
                 pick = tkSimpleDialog.askstring(
                     "Opponent's pick",
                     "Not a valid pick, please select again\nCurrent Pick: Round {0}: Pick {1}" \
                         .format(self.game.currentround, self.game.currentposition))
+
 
     def __MainUI(self):
     
@@ -387,10 +402,15 @@ class MainUI(Frame):
 
             elif decision == 3:
                 player = otherplayer.get()
-                self.game.add_player_to_team(player)
-                utils.remove_player_from_possible_players(player, self.game.connection, self.game.cursor)
+                try:
+                    self.game.add_player_to_team(player)
+                    utils.remove_player_from_possible_players(player, self.game.connection, self.game.cursor)
+                except:
+                    tkMessageBox.showinfo("Error", "Can't add that player to team, try again.")
+                    self.user_pick_logic()
 
-            self.game.clear_finished_tables()
+
+            #self.game.clear_finished_tables()
             self.userpickmade.set(True)
 
 
@@ -502,7 +522,7 @@ class FinalUI(Frame):
 
         # self.__draw_menu()
         self.__draw_final_team(self.parent)
-        self.__draw_opponent_teams()
+        self.__draw_opponent_teams(self.parent)
 
     def __draw_final_team(self, parent):
         finalteam = self.game.current_team

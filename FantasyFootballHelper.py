@@ -51,7 +51,14 @@ class draftgame(object):
         print self.current_team
             
     def add_player_to_team(self, player):
-        self.current_team[player] = utils.get_player_position(player, self.cursor)
+
+        position = utils.get_player_position(player, self.cursor).rstrip('0123456789 ').upper()
+
+        if utils.get_player_from_table(player, position, self.cursor) != None:
+            self.current_team[player] = position
+
+        else:
+            raise Exception("Couldn't add player to team")
           
     def user_pick_player(self):
         pickmade = False
@@ -114,6 +121,16 @@ class draftgame(object):
     
         return current_positions
         
+    def get_needed_positions(self):
+
+        positions = utils.get_positions_list(self.cursor)
+
+        for position in positions:
+            if position not in self.check_current_team_needs():
+                positions.remove(position)
+
+        return positions
+
     def get_possible_players_tuples(self, limit):
         """
         returns a list of tuples of playername, weighted score and position,
@@ -121,7 +138,7 @@ class draftgame(object):
         """
         assert type(limit) == str
         possible_players = []
-        for position in utils.get_positions_list(self.cursor):
+        for position in self.get_needed_positions():
             for player in utils.get_top_values(position, "name, weighted_score, position", "weighted_score", limit, self.cursor):
                 possible_players.append(player)
         return possible_players
@@ -170,10 +187,10 @@ class draftgame(object):
                 pass
         return needs
         
-    def clear_finished_tables(self):
-        for position in utils.get_positions_list(self.cursor):
-            if position not in self.check_current_team_needs():
-                utils.clear_table(position, self.connection, self.cursor)
+    # def clear_finished_tables(self):
+    #     for position in utils.get_positions_list(self.cursor):
+    #         if position not in self.check_current_team_needs():
+    #             utils.clear_table(position, self.connection, self.cursor)
                 
     def try_mean(self, list):
         try:
