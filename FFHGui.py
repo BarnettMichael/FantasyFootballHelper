@@ -234,18 +234,6 @@ class StartUpUI(Frame):
             
             for x in xrange(self.game.numberofopponents):
                 self.game.opponents.append(Opponent.Opponent(x))
-            
-            # if self.game.draftstyle == "Linear":
-            #     if self.game.draftposition == 1:
-            #         MainUI(self.parent, self.game)
-            #     else:
-            #         OpponentChoiceUI(self.parent, self.game, 1)
-            #
-            # elif self.game.draftstyle == "Snake":
-            #     if self.game.draftposition == 1:
-            #         MainUI(self.parent, self.game)
-            #     else:
-            #         OpponentChoiceUI(self.parent, self.game, 1)
 
             MainUI(self.parent, self.game)
             
@@ -267,15 +255,17 @@ class MainUI(Frame):
     """
     
     def __init__(self, parent, draftgame):
-        self.current_opponent_id = 0
 
+        self.current_opponent_id = 0
         self.userpickmade = BooleanVar()
         self.userpickmade.set(False)
+
         self.game = draftgame
         self.parent = parent
         Frame.__init__(self, parent)
         self.grid()        
         self.__MainUI()
+
         self.draft_logic()
 
     def draft_logic(self):
@@ -285,6 +275,8 @@ class MainUI(Frame):
 
         elif self.game.draftstyle == "Snake":
             self.SnakeDraft()
+
+        FinalUI(self.parent, self.game)
 
     def LinearDraft(self):
         while self.game.currentround <= self.game.numberofrounds:
@@ -361,7 +353,7 @@ class MainUI(Frame):
         self.__draw_current_team(self.parent)
         self.__draw_team_requirements(self.parent)
         self.__draw_current_choice(self.parent)
-        #self.__draw_other_player_teams()
+        self.__draw_opponent_teams(self.parent)
         
     def __draw_current_choice(self, parent):
         
@@ -382,8 +374,6 @@ class MainUI(Frame):
         
         
         def pickplayer():
-
-            print "Button Press Did something"
 
             decision = choice.get()
 
@@ -481,48 +471,66 @@ class MainUI(Frame):
         Label(parent, text = currentteamstring).grid(
             row=5, column=1, columnspan=4)
 
-# class OpponentChoiceUI(Frame):
-#     """
-#     Opponent Choice Window
-#     Takes draft position as additional argument
-#     """
-#
-#     def __init__(self, parent, draftgame, draftposition):
-#         self.game = draftgame
-#         self.parent = parent
-#         self.draftposition = draftposition
-#         Frame.__init__(self, self.parent)
-#         self.grid()
-#         self.__draw_opponent_choice_window(self.draftposition)
-#
-#     def __draw_opponent_choice_window(self, draftposition):
-#
-#         opp_choice_window = Toplevel()
-#         opp_choice_window.grab_set()
-#         opp_choice_window.title("Opponent %d Pick" % (draftposition))
-#
-#         for widget in self.parent.winfo_children():
-#             widget.destroy()
-#
-#         MainUI(self.parent, self.game)
-#
-#         pick = StringVar()
-#         pickbox = Entry(opp_choice_window, textvariable=pick)
-#
-#         def opponentpick():
-#
-#             opppick = pick.get()
-#
-#             self.game.opponentteams[draftposition - 1].append(opppick)
-#             if utils.get_player_position(opppick, self.game.cursor) != None:
-#                 utils.remove_player_from_possible_players(opppick, self.game.connection, self.game.cursor)
-#
-#             ##Call back to mainUI
-#
-#         Label(opp_choice_window, text="Opponent Pick").grid()
-#         pickbox.grid(row=0, column=1)
-#         Button(opp_choice_window, text="OK", command=opponentpick).grid(column=1)
-        
+    def __draw_opponent_teams(self, parent):
+
+        opponents = self.game.opponents
+
+        for opponent in opponents:
+            Label(parent, text = "Opponent{0}'s Team: ".format(opponent.id + 1)).grid(
+                row = 6 + opponent.id)
+            Label(parent, text = str(opponent.team)).grid(
+                row=6 + opponent.id,
+                column=1, columnspan=4)
+
+class FinalUI(Frame):
+    """
+    After draft results Screen
+    """
+
+    def __init__(self, parent, draftgame):
+        self.game = draftgame
+        self.parent = parent
+        Frame.__init__(self, parent)
+        self.grid()
+        self.__FinalUI()
+
+    def __FinalUI(self):
+        self.parent.title("Results")
+
+        for widget in self.parent.winfo_children():
+            widget.destroy()
+
+        # self.__draw_menu()
+        self.__draw_final_team(self.parent)
+        self.__draw_opponent_teams()
+
+    def __draw_final_team(self, parent):
+        finalteam = self.game.current_team
+        teamlist = []
+
+        for key in finalteam.keys():
+            playerstring = "{0} {1}".format(key, finalteam[key])
+            teamlist.append(playerstring)
+
+        finalteamstring = (", ".join(teamlist[0:len(teamlist) / 2 + 1])
+                             + "\n" + ", ".join(teamlist[len(teamlist) / 2 + 1:]))
+
+        Label(parent, text="Final Team: ").grid(
+            row=1)
+        Label(parent, text=finalteamstring).grid(
+            row=1, column=1, columnspan=4)
+
+    def __draw_opponent_teams(self, parent):
+
+        opponents = self.game.opponents
+
+        for opponent in opponents:
+            Label(parent, text = "Opponent{0}'s Team: ".format(opponent.id + 1)).grid(
+                row = 2 + opponent.id)
+            Label(parent, text = str(opponent.team)).grid(
+                row=2 + opponent.id,
+                column=1, columnspan=4)
+
         
 ffhelper = FantasyFootballHelper.draftgame()       
         
