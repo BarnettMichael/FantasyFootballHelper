@@ -101,7 +101,6 @@ class MainUI(Frame):
         FinalUI(self.parent, self.game)
 
     def LinearDraft(self):
-        print "Linear Draft Started"
         while self.game.currentround <= self.game.numberofrounds:
             if self.game.draftposition != self.game.currentposition:
                 self.opponent_pick_logic(self.current_opponent_id)
@@ -112,25 +111,19 @@ class MainUI(Frame):
                 self.increment_position()
 
     def SnakeDraft(self):
-        print "Snake Draft Started"
         while self.game.currentround <= self.game.numberofrounds:
             if self.game.currentround % 2 != 0:
                 if self.game.draftposition != self.game.currentposition:
-                    print "Opponent {0} Pick, odd round".format(self.current_opponent_id)
                     self.opponent_pick_logic(self.current_opponent_id)
                     self.current_opponent_id += 1
                     self.increment_position()
                 else:
-                    print "User Pick"
                     self.user_pick_logic()
                     self.increment_position()
             else:
                 if self.game.draftposition != \
                                         self.game.numberofopponents \
                                         - self.game.currentposition + 2:
-                    print "Opponent {0} Pick, Even round".format(
-                        self.game.numberofopponents - self.current_opponent_id - 1
-                    )
                     self.opponent_pick_logic(
                         self.game.numberofopponents - self.current_opponent_id - 1
                     )
@@ -149,13 +142,15 @@ class MainUI(Frame):
             self.game.currentposition = 1
             self.current_opponent_id = 0
 
+        self.__MainUI()
+
     def user_pick_logic(self):
 
         self.userpickmade.set(False)
 
         while not self.userpickmade.get():
             self.wait_variable(name=self.userpickmade)
-            self.__MainUI()
+            # self.__MainUI()
 
     def opponent_pick_logic(self, opponent_id):
         pickmade = False
@@ -173,7 +168,7 @@ class MainUI(Frame):
                         utils.remove_player_from_possible_players(pick, self.game.connection, self.game.cursor)
                         opponent = [opponent for opponent in self.game.opponents if opponent_id == opponent.id][0]
                         opponent.team.append(pick)
-                        self.__MainUI()
+                        # self.__MainUI()
                         pickmade = True
                     else:
                         pick = tkSimpleDialog.askstring(
@@ -194,13 +189,12 @@ class MainUI(Frame):
                         .format(self.game.currentround, self.game.currentposition))
 
     def __MainUI(self):
-    
+
         self.parent.title("Fantasy Football Helper")
                
         for widget in self.parent.winfo_children():
             widget.destroy()
-                
-        #self.__draw_menu()
+
         self.__draw_round_label(self.parent)
         self.__draw_recommended_list(self.parent)
         self.__draw_valuable_list(self.parent)
@@ -215,7 +209,6 @@ class MainUI(Frame):
                                                       self.game.currentposition)). \
             grid(row=0)
 
-        
     def __draw_current_choice(self, parent):
         
         choice = IntVar()
