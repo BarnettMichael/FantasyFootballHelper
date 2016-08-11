@@ -6,184 +6,6 @@ import FantasyFootballHelper
 import utils
 import Opponent
 
-
-# class ffhUI(Frame):
-#     """
-#     UI for Fantasy Football Helper
-#     """
-#
-#     def __init__(self, parent, draftgame):
-#         self.game = draftgame
-#         self.parent = parent
-#         Frame.__init__(self, parent)
-#         self.grid()
-#         self.__initUI()
-#
-#     # def __initUI(self):
-#     #     self.__draw_new_draft_window(self.parent)
-#
-#     def __MainUI(self):
-#         self.parent.title("Fantasy Football Helper")
-#
-#         for widget in self.parent.winfo_children():
-#             widget.destroy()
-#
-#         #self.__draw_menu()
-#         print "opponents", self.game.numberofopponents
-#         print "rounds", self.game.numberofrounds
-#         print "position", self.game.draftposition
-#         print "style", self.game.draftstyle
-#
-#         print self.game.current_team
-#         self.__draw_recommended_list(self.parent)
-#         self.__draw_valuable_list(self.parent)
-#         self.__draw_current_team(self.parent)
-#         self.__draw_team_requirements(self.parent)
-#         self.__draw_current_choice(self.parent)
-#         #self.__draw_other_player_teams()
-#
-#
-#     def __draw_current_choice(self, parent):
-#
-#         choice = IntVar()
-#         otherplayer = StringVar()
-#         recommended = self.game.most_recommended_player_remaining()
-#         valuable = self.game.get_best_player_remaining()
-#
-#         recommendedbutton = Radiobutton(parent, text=recommended, variable=choice, value=1)
-#         valuablebutton = Radiobutton(parent, text=valuable, variable=choice, value=2)
-#         otherbutton = Radiobutton(parent, text="", variable=choice, takefocus=0, value=3)
-#         othertext = Entry(parent, textvariable=otherplayer)
-#
-#         def textfocus(event):
-#             otherbutton.select()
-#
-#         othertext.bind("<Button-1>", textfocus)
-#
-#
-#         def pickplayer():
-#             decision = choice.get()
-#
-#             if decision == 1:
-#                 print "Recommended Chosen"
-#                 self.game.add_player_to_team(self.game.most_recommended_player_remaining())
-#                 utils.remove_player_from_possible_players(self.game.get_best_player_remaining(), self.game.connection, self.game.cursor)
-#
-#             elif decision == 2:
-#                 print "MVP chosen"
-#                 self.game.add_player_to_team(self.game.get_best_player_remaining())
-#                 utils.remove_player_from_possible_players(self.game.get_best_player_remaining(), self.game.connection, self.game.cursor)
-#
-#             elif decision == 3:
-#                 print "Other Player being chosen"
-#                 player = otherplayer.get()
-#                 print player
-#                 self.game.add_player_to_team(player)
-#                 utils.remove_player_from_possible_players(player, self.game.connection, self.game.cursor)
-#
-#             self.game.clear_finished_tables()
-#
-#         Label(parent, text="Recommended Player").grid(sticky=W, row=0)
-#         recommendedbutton.grid(sticky=W, row=0, column=1, columnspan=2)
-#
-#         Label(parent, text="Most Valuable Player").grid(sticky=W, row=1)
-#         valuablebutton.grid(sticky=W, row=1, column=1, columnspan=2)
-#
-#         Label(parent, text="Choose other Player").grid(sticky=W, row=2)
-#         otherbutton.grid(sticky=W, row=2, column=1)
-#         othertext.grid(row=2, column=2, sticky=W)
-#
-#         pickbutton = Button(parent, text="Pick", command=pickplayer).grid(
-#             row=3, columnspan=3, sticky=NE)
-#
-#     def __draw_recommended_list(self, parent):
-#
-#         recommendedlist = self.game.get_list_recommended_players("10")
-#         recommendedlistbox = Text(parent, height=10, width=35)
-#
-#         Label(parent, text="List of Recommended Players").grid(row=0, column=3)
-#         recommendedlistbox.grid(row=1, column=3, rowspan=4, sticky=N)
-#         for player in recommendedlist:
-#             index = str(recommendedlist.index(player) + 1)
-#             recommendedlistbox.insert(END, index + ":"
-#                                            + player[0] + " "
-#                                            + player[2] + " "
-#                                            + format(player[1], '.2f') + "\n"
-#                                    )
-#
-#         recommendedlistbox.config(state=DISABLED)
-#
-#     def __draw_valuable_list(self, parent):
-#
-#         valuablelist = self.game.get_list_of_best_players("10")
-#         valuablelistbox = Text(parent, height=10, width=35)
-#
-#         Label(parent, text="List of Most Valuable Players").grid(row=0, column=4)
-#         valuablelistbox.grid(row=1, column=4, rowspan=4, sticky=N)
-#         for player in valuablelist:
-#             index = str(valuablelist.index(player) + 1)
-#             valuablelistbox.insert(END, index + ":"
-#                                         + player[0] + " "
-#                                         + player[2] + " "
-#                                         + format(player[1], '.2f') + "\n"
-#                                    )
-#
-#         valuablelistbox.config(state=DISABLED)
-#
-#     def __draw_team_requirements(self, parent):
-#
-#         requirements = self.game.check_current_team_needs()
-#         requirementlist = []
-#
-#         for key in requirements.keys():
-#             keystring = "%d%s" % (requirements[key], key)
-#             requirementlist.append(keystring)
-#
-#         Label(parent, text = "Still Need: " + ", ".join(requirementlist)).grid(
-#             row = 4, columnspan = 3, sticky=W)
-#
-#     def __draw_current_team(self, parent):
-#
-#         currentteam = self.game.current_team
-#         teamlist = []
-#
-#         for key in currentteam.keys():
-#             playerstring = "%s %s" % (key, currentteam[key])
-#             teamlist.append(playerstring)
-#
-#         currentteamstring = (", ".join(teamlist[0:len(teamlist) / 2 + 1])
-#                              + "\n" + ", ".join(teamlist[len(teamlist) / 2 + 1:]))
-#
-#         Label(parent, text = "Current Team: ").grid(
-#             row=5)
-#         Label(parent, text = currentteamstring).grid(
-#             row=5, column=1, columnspan=4)
-#
-#     def __draw_new_opponent_choice_window(self, parent, opponentindex):
-#
-#
-#         self.parent.title("Opponent %d Pick" % (opponentindex))
-#
-#         for widget in self.parent.winfo_children():
-#             widget.destroy()
-#
-#         pick = StringVar()
-#         pickbox = Entry(parent, textvariable=pick)
-#
-#         def opponentpick():
-#
-#             opppick = pick.get()
-#
-#             self.game.opponentteams[opponentindex - 1].append(opppick)
-#             if utils.get_player_position(opppick, self.game.cursor) != None:
-#                 utils.remove_player_from_possible_players(opppick, self.game.connection, self.game.cursor)
-#
-#             self.__MainUI()
-#
-#         Label(parent, text="Opponent Pick").grid()
-#         pickbox.grid(row=0, column=1)
-#         Button(parent, text="OK", command=opponentpick).grid(column=1)
-
 class StartUpUI(Frame):
     """
     UI object for new draft window
@@ -205,7 +27,6 @@ class StartUpUI(Frame):
 
         style = StringVar()
         style.set("Snake")
-        style.set("Linear") ## Just for testing, should be Snake in release
 
         opponentlabel = Label(parent, text="Opponents")
         opponententry = Entry(parent, width=5)
@@ -280,6 +101,7 @@ class MainUI(Frame):
         FinalUI(self.parent, self.game)
 
     def LinearDraft(self):
+        print "Linear Draft Started"
         while self.game.currentround <= self.game.numberofrounds:
             if self.game.draftposition != self.game.currentposition:
                 self.opponent_pick_logic(self.current_opponent_id)
@@ -290,15 +112,33 @@ class MainUI(Frame):
                 self.increment_position()
 
     def SnakeDraft(self):
-        print "Snake Draft"
+        print "Snake Draft Started"
         while self.game.currentround <= self.game.numberofrounds:
-            if self.game.draftposition != self.game.currentposition:
-                self.opponent_pick_logic(self.current_opponent_id)
-                self.current_opponent_id += 1
-                self.increment_position()
+            if self.game.currentround % 2 != 0:
+                if self.game.draftposition != self.game.currentposition:
+                    print "Opponent {0} Pick, odd round".format(self.current_opponent_id)
+                    self.opponent_pick_logic(self.current_opponent_id)
+                    self.current_opponent_id += 1
+                    self.increment_position()
+                else:
+                    print "User Pick"
+                    self.user_pick_logic()
+                    self.increment_position()
             else:
-                self.user_pick_logic()
-                self.increment_position()
+                if self.game.draftposition != \
+                                        self.game.numberofopponents \
+                                        - self.game.currentposition + 2:
+                    print "Opponent {0} Pick, Even round".format(
+                        self.game.numberofopponents - self.current_opponent_id - 1
+                    )
+                    self.opponent_pick_logic(
+                        self.game.numberofopponents - self.current_opponent_id - 1
+                    )
+                    self.current_opponent_id += 1
+                    self.increment_position()
+                else:
+                    self.user_pick_logic()
+                    self.increment_position()
 
     def increment_position(self):
 
@@ -327,7 +167,6 @@ class MainUI(Frame):
 
         while not pickmade:
             try:
-
                 if utils.get_player_position(pick, self.game.cursor) != None:
                     position = utils.get_player_position(pick, self.game.cursor).rstrip('0123456789 ').upper()
                     if utils.get_player_from_table(pick, position, self.game.cursor) != None:
@@ -354,7 +193,6 @@ class MainUI(Frame):
                     "Not a valid pick, please select again\nCurrent Pick: Round {0}: Pick {1}" \
                         .format(self.game.currentround, self.game.currentposition))
 
-
     def __MainUI(self):
     
         self.parent.title("Fantasy Football Helper")
@@ -363,12 +201,20 @@ class MainUI(Frame):
             widget.destroy()
                 
         #self.__draw_menu()
+        self.__draw_round_label(self.parent)
         self.__draw_recommended_list(self.parent)
         self.__draw_valuable_list(self.parent)
         self.__draw_current_team(self.parent)
         self.__draw_team_requirements(self.parent)
         self.__draw_current_choice(self.parent)
         self.__draw_opponent_teams(self.parent)
+
+    def __draw_round_label(self, parent):
+
+        Label(parent, text="Round{0}: Pick{1}".format(self.game.currentround,
+                                                      self.game.currentposition)). \
+            grid(row=0)
+
         
     def __draw_current_choice(self, parent):
         
@@ -415,26 +261,26 @@ class MainUI(Frame):
 
 
 
-        Label(parent, text="Recommended Player").grid(sticky=W, row=0)
-        recommendedbutton.grid(sticky=W, row=0, column=1, columnspan=2)
+        Label(parent, text="Recommended Player").grid(sticky=W, row=1)
+        recommendedbutton.grid(sticky=W, row=1, column=1, columnspan=2)
         
-        Label(parent, text="Most Valuable Player").grid(sticky=W, row=1)
-        valuablebutton.grid(sticky=W, row=1, column=1, columnspan=2)
+        Label(parent, text="Most Valuable Player").grid(sticky=W, row=2)
+        valuablebutton.grid(sticky=W, row=2, column=1, columnspan=2)
         
-        Label(parent, text="Choose other Player").grid(sticky=W, row=2)
-        otherbutton.grid(sticky=W, row=2, column=1)
-        othertext.grid(row=2, column=2, sticky=W)
+        Label(parent, text="Choose other Player").grid(sticky=W, row=3)
+        otherbutton.grid(sticky=W, row=3, column=1)
+        othertext.grid(row=3, column=2, sticky=W)
         
         pickbutton = Button(parent, text="Pick", command=pickplayer).grid(
-            row=3, columnspan=3, sticky=NE)
+            row=4, columnspan=3, sticky=NE)
         
     def __draw_recommended_list(self, parent):
         
         recommendedlist = self.game.get_list_recommended_players("10")
         recommendedlistbox = Text(parent, height=10, width=35)
         
-        Label(parent, text="List of Recommended Players").grid(row=0, column=3)
-        recommendedlistbox.grid(row=1, column=3, rowspan=4, sticky=N)
+        Label(parent, text="List of Recommended Players").grid(row=1, column=3)
+        recommendedlistbox.grid(row=2, column=3, rowspan=4, sticky=N)
         for player in recommendedlist:
             index = str(recommendedlist.index(player) + 1)
             recommendedlistbox.insert(END, index + ":"
@@ -450,8 +296,8 @@ class MainUI(Frame):
         valuablelist = self.game.get_list_of_best_players("10")
         valuablelistbox = Text(parent, height=10, width=35)
         
-        Label(parent, text="List of Most Valuable Players").grid(row=0, column=4)
-        valuablelistbox.grid(row=1, column=4, rowspan=4, sticky=N)
+        Label(parent, text="List of Most Valuable Players").grid(row=1, column=4)
+        valuablelistbox.grid(row=2, column=4, rowspan=4, sticky=N)
         for player in valuablelist:
             index = str(valuablelist.index(player) + 1)
             valuablelistbox.insert(END, index + ":" 
@@ -472,7 +318,7 @@ class MainUI(Frame):
             requirementlist.append(keystring)
         
         Label(parent, text = "Still Need: " + ", ".join(requirementlist)).grid(
-            row = 4, columnspan = 3, sticky=W)
+            row = 5, columnspan = 3, sticky=W)
             
     def __draw_current_team(self, parent):
         
@@ -487,9 +333,9 @@ class MainUI(Frame):
                              + "\n" + ", ".join(teamlist[len(teamlist) / 2 + 1:]))
         
         Label(parent, text = "Current Team: ").grid(
-            row=5)
+            row=6)
         Label(parent, text = currentteamstring).grid(
-            row=5, column=1, columnspan=4)
+            row=6, column=1, columnspan=4)
 
     def __draw_opponent_teams(self, parent):
 
@@ -497,9 +343,9 @@ class MainUI(Frame):
 
         for opponent in opponents:
             Label(parent, text = "Opponent{0}'s Team: ".format(opponent.id + 1)).grid(
-                row = 6 + opponent.id)
+                row = 7 + opponent.id)
             Label(parent, text = str(opponent.team)).grid(
-                row=6 + opponent.id,
+                row=7 + opponent.id,
                 column=1, columnspan=4)
 
 class FinalUI(Frame):
