@@ -1,25 +1,7 @@
-from Tkinter import *
-
 import utils
 
-#connection = None
 
-## write a function that gets player past scores and weightedly averages them.
-
-## Current PLAN:
-## create temp clone of players table, work on that.
-## get list of discrete positions, for each position create a temporary table.
-## for every player in each position, populate appropriate temptable
-## with name, weighted_score(primary key order by desc), current_team, position
-## check current_team against restrictions on player composition
-## then search a join of all temp tables. return player with highest weighted_score
-## that fits the current restrictions.
-## give option to pick or lost. If picked add to list/dictionary of current team
-## whether lost or pick, remove from temp tables.
-## repeat until current_team is full
-
-    
-class draftgame(object):
+class DraftGame(object):
     def __init__(self):
         """
         initialises current_team
@@ -36,74 +18,74 @@ class draftgame(object):
         self.temp_table_columns = "id, name, position, current_team, weighted_score"
         
         utils.create_temp_clone_table("players", "cloneplayers", self.clone_table_column_creators,
-                            self.clone_table_columns, self.connection, self.cursor)
+                                      self.clone_table_columns, self.connection, self.cursor)
         utils.add_column_to_table("cloneplayers", "weighted_score", "float", self.connection, self.cursor)
         utils.update_weighted_scores(self.connection, self.cursor)
         for position in utils.get_positions_list(self.cursor):
-            filterposition = position.rstrip('0123456789 ').upper() + '%'
+            filter_position = position.rstrip('0123456789 ').upper() + '%'
             utils.create_temporary_table(position, self.temp_table_column_creators, self.connection, self.cursor)
-            utils.populate_temp_table_from_other_table(position, self.temp_table_columns, "cloneplayers", "position", filterposition, self.connection, self.cursor)
+            utils.populate_temp_table_from_other_table(position, self.temp_table_columns, "cloneplayers", "position", filter_position, self.connection, self.cursor)
     
-    def print_table(self, table):
-        utils.print_table(table)
+    # def print_table(self, table):
+    #     utils.print_table(table)
         
-    def print_current_team(self):
-        print self.current_team
+    # def print_current_team(self):
+    #     print self.current_team
             
     def add_player_to_team(self, player):
 
         position = utils.get_player_position(player, self.cursor).rstrip('0123456789 ').upper()
 
-        if utils.get_player_from_table(player, position, self.cursor) != None:
+        if utils.get_player_from_table(player, position, self.cursor) is not None:
             self.current_team[player] = position
 
         else:
             raise Exception("Couldn't add player to team")
           
-    def user_pick_player(self):
-        pickmade = False
-        while pickmade == False:
-            player = raw_input("""Choose Your Player:
-        1 for Best Player Available: %s
-        2 for Most Recommended Player: %s
-        Enter another player:\n-->""" % (self.get_best_player_remaining(), self.most_recommended_player_remaining()))
-            if player.startswith("1"):
-                print "%s picked\n" % self.get_best_player_remaining()
-                self.add_player_to_team(self.get_best_player_remaining())
-                utils.remove_player_from_possible_players(self.get_best_player_remaining(), self.connection, self.cursor)
-                pickmade = True
-            elif player.startswith("2"):
-                print "%s picked\n" % self.most_recommended_player_remaining()
-                self.add_player_to_team(self.most_recommended_player_remaining())
-                utils.remove_player_from_possible_players(self.most_recommended_player_remaining(), self.connection, self.cursor)
-                pickmade = True
-            elif utils.get_player_position(player, self.cursor) != None:
-                print "%s picked as user pick\n" % player
-                self.add_player_to_team(player)
-                utils.remove_player_from_possible_players(player, self.connection, self.cursor)
-                pickmade = True
-            else:
-                print "%s not found in database\n" % player
-        return pickmade
+    # def user_pick_player(self):
+    #     pickmade = False
+    #     while pickmade == False:
+    #         player = raw_input("""Choose Your Player:
+    #     1 for Best Player Available: %s
+    #     2 for Most Recommended Player: %s
+    #     Enter another player:\n-->""" % (self.get_best_player_remaining(), self.most_recommended_player_remaining()))
+    #         if player.startswith("1"):
+    #             print "%s picked\n" % self.get_best_player_remaining()
+    #             self.add_player_to_team(self.get_best_player_remaining())
+    #             utils.remove_player_from_possible_players(self.get_best_player_remaining(), self.connection, self.cursor)
+    #             pickmade = True
+    #         elif player.startswith("2"):
+    #             print "%s picked\n" % self.most_recommended_player_remaining()
+    #             self.add_player_to_team(self.most_recommended_player_remaining())
+    #             utils.remove_player_from_possible_players(self.most_recommended_player_remaining(), self.connection, self.cursor)
+    #             pickmade = True
+    #         elif utils.get_player_position(player, self.cursor) != None:
+    #             print "%s picked as user pick\n" % player
+    #             self.add_player_to_team(player)
+    #             utils.remove_player_from_possible_players(player, self.connection, self.cursor)
+    #             pickmade = True
+    #         else:
+    #             print "%s not found in database\n" % player
+    #     return pickmade
         
-    def opponent_pick_player(self):
-        pickmade = False
-        print "Opponent Picking"
-        print "If opponents picks defense, must type whole name e.g. Philadelphia Eagles"
-        while pickmade == False:
-            player = raw_input("Who did opponent pick?\n--> ")
-            if utils.get_player_position(player, self.cursor) != None:
-                utils.remove_player_from_possible_players(player, self.connection, self.cursor)
-                print "%s removed from available players\n" % player
-                pickmade = True
-            else:
-                print "%s not found in database\n" % player
+    # def opponent_pick_player(self):
+    #     pickmade = False
+    #     print "Opponent Picking"
+    #     print "If opponents picks defense, must type whole name e.g. Philadelphia Eagles"
+    #     while pickmade == False:
+    #         player = raw_input("Who did opponent pick?\n--> ")
+    #         if utils.get_player_position(player, self.cursor) != None:
+    #             utils.remove_player_from_possible_players(player, self.connection, self.cursor)
+    #             print "%s removed from available players\n" % player
+    #             pickmade = True
+    #         else:
+    #             print "%s not found in database\n" % player
             
     def check_current_team_positions(self):
-        current_positions = {"QB" : 0, "TE" : 0,
-                            "RB" : 0, "K" : 0,
-                            "WR" : 0, "DEFENSE": 0
-                            }
+        current_positions = {"QB": 0, "TE": 0,
+                             "RB": 0, "K": 0,
+                             "WR": 0, "DEFENSE": 0
+                             }
         current_position_list = self.current_team.values()
         for position in current_position_list:
             if position.startswith('QB'):
@@ -118,7 +100,7 @@ class draftgame(object):
                 current_positions["K"] += 1
             elif position.startswith('DEF'):
                 current_positions["DEFENSE"] += 1
-    
+
         return current_positions
         
     def get_needed_positions(self):
@@ -133,14 +115,18 @@ class draftgame(object):
 
     def get_possible_players_tuples(self, limit):
         """
-        returns a list of tuples of playername, weighted score and position,
+        returns a list of tuples of player_name, weighted score and position,
         number of elements is top (limit) from each position.
         """
         assert type(limit) == str
         possible_players = []
         for position in self.get_needed_positions():
-            for player in utils.get_top_values(position, "name, weighted_score, position", "weighted_score", limit, self.cursor):
+            for player in utils.get_top_values(
+                    position, "name, weighted_score, position",
+                    "weighted_score", limit, self.cursor):
+
                 possible_players.append(player)
+
         return possible_players
           
     def get_best_player_remaining(self):
@@ -152,65 +138,67 @@ class draftgame(object):
         scores = []
         for player in possible_players:
             scores.append(player[1])
-        bestscore = max(scores)
+        best_score = max(scores)
         for player in possible_players:
-            if player[1] == bestscore:
+            if player[1] == best_score:
                 return str(player[0])
         return None
 
     def get_list_of_best_players(self, limit):
         """
-        returns a list of tuples of playername, weighted score and position,
+        returns a list of tuples of player_name, weighted score and position,
         number of elements returned determined by top (limit) across all positions
         """
         assert type(limit) == str
-        possibleplayers = self.get_possible_players_tuples(limit)
+        possible_players = self.get_possible_players_tuples(limit)
         
-        possibleplayers.sort(key=lambda t: t[1], reverse=True)
+        possible_players.sort(key=lambda t: t[1], reverse=True)
         
-        return possibleplayers[:int(limit) + 1]
+        return possible_players[:int(limit) + 1]
         
     def check_current_team_needs(self):
         """need 1QB, 2RB, 2WR, 1 TE, 1 K, 1 Def, 1 Flex, 7 Bench"""
         needs = {}
-        required_team = {"QB" : 1, "TE" : 1,
-                         "RB" : 2, "K" : 1,
-                         "WR" : 2, "DEFENSE": 1,
-                         "Flex" : 1, "Bench" : 7
+        required_team = {"QB": 1, "TE": 1,
+                         "RB": 2, "K": 1,
+                         "WR": 2, "DEFENSE": 1,
+                         "Flex": 1, "Bench": 7
                          }
+
         current_positions = self.check_current_team_positions()
+
         for position in required_team.keys():
             try:
                 if current_positions[position] < required_team[position]:
                     needs[position] = required_team[position] - current_positions[position]
             except:
                 pass
+
         return needs
-        
-    # def clear_finished_tables(self):
-    #     for position in utils.get_positions_list(self.cursor):
-    #         if position not in self.check_current_team_needs():
-    #             utils.clear_table(position, self.connection, self.cursor)
                 
-    def try_mean(self, list):
+    def try_mean(self, integer_list):
+
         try:
-            mean = sum(list) / len(list)
+            mean = sum(integer_list) / len(integer_list)
         except:
             mean = None
+
         return mean
 
-    def try_variance(self, list, mean):
+    def try_variance(self, integer_list, mean):
+
         try:
-            variance = sum((mean - item) ** 2 for item in list) / len(list)
+            variance = sum((mean - item) ** 2 for item in integer_list) / len(integer_list)
         except:
             variance = 0
-        return variance ** (0.5)
+
+        return variance ** 0.5
         
-    def make_variance_dictionary(self, playerlist):
-        
+    def make_variance_dictionary(self, player_list):
+
         qb, rb, wr, te, k, defense = [], [], [], [], [], []
-        
-        for player in playerlist:
+
+        for player in player_list:
             if player[2].rstrip('0123456789 ').upper() == "QB":
                 qb.append(player[1])
             elif player[2].rstrip('0123456789 ').upper() == "RB":
@@ -223,39 +211,40 @@ class draftgame(object):
                 k.append(player[1])
             elif utils.defense_fixer(player[2]) == "DEFENSE":
                 defense.append(player[1])
-        
-        qbmean = self.try_mean(qb)
-        rbmean = self.try_mean(rb)
-        wrmean = self.try_mean(wr)
-        temean = self.try_mean(te)
-        kmean = self.try_mean(k)
-        defmean = self.try_mean(defense)
-                
-        qbvar = self.try_variance(qb, qbmean)
-        rbvar = self.try_variance(rb, rbmean)
-        wrvar = self.try_variance(wr, wrmean)
-        tevar = self.try_variance(te, temean)
-        kvar = self.try_variance(k, kmean)
-        defvar = self.try_variance(defense, defmean)
-        
-        vardict = {"QB": qbvar, "RB": rbvar, "WR": wrvar,
-                   "TE": tevar, "K": kvar, "DEFENSE": defvar}
-                   
-        return vardict
+
+        qb_mean = self.try_mean(qb)
+        rb_mean = self.try_mean(rb)
+        wr_mean = self.try_mean(wr)
+        te_mean = self.try_mean(te)
+        k_mean = self.try_mean(k)
+        def_mean = self.try_mean(defense)
+
+        qb_var = self.try_variance(qb, qb_mean)
+        rb_var = self.try_variance(rb, rb_mean)
+        wr_var = self.try_variance(wr, wr_mean)
+        te_var = self.try_variance(te, te_mean)
+        k_var = self.try_variance(k, k_mean)
+        def_var = self.try_variance(defense, def_mean)
+
+        variance_dict = {"QB": qb_var, "RB": rb_var, "WR": wr_var,
+                         "TE": te_var, "K": k_var, "DEFENSE": def_var}
+
+        return variance_dict
         
     def most_recommended_player_remaining(self):
         
         possible_players = self.get_possible_players_tuples("1")
         
-        vardict = self.make_variance_dictionary(self.get_possible_players_tuples("5"))
-        maxvar = max(vardict.values())
-        
-        for position in vardict:
-            if vardict[position] == maxvar:
-                bestposition = position
+        variance_dict = self.make_variance_dictionary(self.get_possible_players_tuples("5"))
+        max_variance = max(variance_dict.values())
+        best_position = ""
+
+        for position in variance_dict:
+            if variance_dict[position] == max_variance:
+                best_position = position
                 
         for player in possible_players:
-            if utils.defense_fixer(player[2].rstrip('0123456789 ').upper()) == bestposition:
+            if utils.defense_fixer(player[2].rstrip('0123456789 ').upper()) == best_position:
                 return str(player[0])
             
         return None
@@ -263,80 +252,20 @@ class draftgame(object):
     def get_list_recommended_players(self, limit):
         
         assert type(limit) == str
-        possibleplayers = self.get_possible_players_tuples(limit)
+        possible_players = self.get_possible_players_tuples(limit)
        
-        vardict = self.make_variance_dictionary(possibleplayers)
-        recommendedplayers = []
+        variance_dict = self.make_variance_dictionary(possible_players)
+        recommended_players = []
        
-        for player in possibleplayers:
+        for player in possible_players:
             position = utils.defense_fixer(player[2]).rstrip('0123456789 ').upper()
             
-            newtuple = (player[0],
-                        player[1] + vardict[position],
-                        player[2])
+            player_tuple = (player[0],
+                            player[1] + variance_dict[position],
+                            player[2])
                         
-            recommendedplayers.append(newtuple)
+            recommended_players.append(player_tuple)
             
-        recommendedplayers.sort(key=lambda t: t[1], reverse=True)
+        recommended_players.sort(key=lambda t: t[1], reverse=True)
         
-        return recommendedplayers[:int(limit) + 1]
-
-#numberofopponents = int(raw_input("How many other people are drafting?"))
-#draft_position = int(raw_input("What position in the First Round are you drafting?"))
-#numberofrounds = int(raw_input("How many rounds are you drafting?"))
-#draft_type = "snake"
-#round = 1
-        
-# while round <= numberofrounds:
-    # if draft_type == "linear":
-        # print "\nStart of round: %d\n\n" % round
-        # for x in xrange(1, draft_position):
-            # print "Opponent %d picking:" % x
-            # ffhelper.opponent_pick_player()
-        # ffhelper.user_pick_player()
-        # for x in xrange(draft_position, numberofopponents + 1):
-            # print "Opponent %d picking:" % x
-            # ffhelper.opponent_pick_player()
-        # print "Team Check", ffhelper.check_current_team_positions()
-        # print "Current Team", ffhelper.current_team
-        # print "Current Team Needs:", ffhelper.check_current_team_needs()
-        # ffhelper.clear_finished_tables()
-        # round += 1
-        
-    # if draft_type == "snake":
-        # print "\nStart of round: %d\n\n" % round
-        # for x in xrange(1, draft_position):
-            # print "Opponent %d picking:" % x
-            # ffhelper.opponent_pick_player()
-        # ffhelper.user_pick_player()
-        # for x in xrange(draft_position, numberofopponents + 1):
-            # print "Opponent %d picking:" % x
-            # ffhelper.opponent_pick_player()
-        # print "Team Check", ffhelper.check_current_team_positions()
-        # print "Current Team", ffhelper.current_team
-        # print "Current Team Needs:", ffhelper.check_current_team_needs()
-        # ffhelper.clear_finished_tables()
-        # round += 1
-        
-        # print "\nStart of round: %d\n\n" % round
-        # for x in xrange(1, ffhelper.numberofopponents + 1 - draft_position):
-            # print "Opponent %d picking:" % (numberofopponents + 1 - x)
-            # ffhelper.opponent_pick_player()
-        # ffhelper.user_pick_player()
-        # for x in xrange(numberofopponents - draft_position + 1, numberofopponents + 1):
-            # print "Opponent %d picking:" % (draft_position + 1 - x)
-            # ffhelper.opponent_pick_player()
-        # print "Team Check", ffhelper.check_current_team_positions()
-        # print "Current Team", ffhelper.current_team
-        # print "Current Team Needs:", ffhelper.check_current_team_needs()
-        # ffhelper.clear_finished_tables()
-        # round += 1
-        
-#print "\n\nWHILE LOOP FINISHED"
-#print "FINAL TEAM:"
-#for player in ffhelper.current_team:
-#    print player
-    
-
-#if connection:
-#   connection.close()
+        return recommended_players[:int(limit) + 1]
