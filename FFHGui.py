@@ -66,17 +66,21 @@ class StartUpUI(Frame):
                                       "Draft position too high!\nYou would never get to pick a player"
                                       )
 
+        def begin_button(event):
+            begin_draft()
+
         ok_button = Button(parent, text="OK", command=begin_draft)
+        self.parent.bind("<Return>", begin_button)
         
-        opponent_label.grid(row=0)
-        opponent_entry.grid(row=0, column=1)
+        opponent_label.grid(row=0, pady=5)
+        opponent_entry.grid(row=0, column=1, pady=5)
         position_label.grid(row=1)
         position_entry.grid(row=1, column=1)
-        rounds_label.grid(row=2)
-        rounds_entry.grid(row=2, column=1)
+        rounds_label.grid(row=2, pady=5)
+        rounds_entry.grid(row=2, column=1, pady=5, padx=5)
         style_label.grid(row=3)
         style_menu.grid(row=3, column=1)
-        ok_button.grid(row=4, column=1, sticky="e")
+        ok_button.grid(row=4, column=1, sticky="se", pady=5, padx=5)
 
         
 class MainUI(Frame):
@@ -179,19 +183,19 @@ class MainUI(Frame):
                     else:
                         pick = tkSimpleDialog.askstring(
                             "Opponent's pick",
-                            "Not a valid pick, please select again\nCurrent Pick: Round {0}: Pick {1}"
+                            "NOT A VALID PICK: please select again\nCurrent Pick: Round {0}: Pick {1}"
                             .format(self.game.current_round, self.game.current_position))
 
                 else:
                     pick = tkSimpleDialog.askstring(
                         "Opponent's pick",
-                        "Not a valid pick, please select again\nCurrent Pick: Round {0}: Pick {1}"
+                        "NOT A VALID PICK: please select again\nCurrent Pick: Round {0}: Pick {1}"
                         .format(self.game.current_round, self.game.current_position))
             except AttributeError:
                 tkMessageBox.showinfo("Error", "Opponent must pick a valid player")
                 pick = tkSimpleDialog.askstring(
                     "Opponent's pick",
-                    "Not a valid pick, please select again\nCurrent Pick: Round {0}: Pick {1}"
+                    "NOT A VALID PICK: please select again\nCurrent Pick: Round {0}: Pick {1}"
                     .format(self.game.current_round, self.game.current_position))
 
     def __MainUI(self):
@@ -236,18 +240,24 @@ class MainUI(Frame):
             decision = choice.get()
 
             if decision == 1:
-                self.game.add_player_to_team(self.game.most_recommended_player_remaining())
+
+                player = self.game.most_recommended_player_remaining()
+                self.game.add_player_to_team(player)
                 utils.remove_player_from_possible_players(
-                    self.game.most_recommended_player_remaining(),
+                    player,
                     self.game.connection,
                     self.game.cursor)
+                self.user_pick_made.set(True)
 
             elif decision == 2:
-                self.game.add_player_to_team(self.game.get_best_player_remaining())
+
+                player = self.game.get_best_player_remaining()
+                self.game.add_player_to_team(player)
                 utils.remove_player_from_possible_players(
-                    self.game.get_best_player_remaining(),
+                    player,
                     self.game.connection,
                     self.game.cursor)
+                self.user_pick_made.set(True)
 
             elif decision == 3:
                 player = other_player.get()
@@ -257,11 +267,17 @@ class MainUI(Frame):
                         player,
                         self.game.connection,
                         self.game.cursor)
+                    self.user_pick_made.set(True)
                 except:
                     tkMessageBox.showinfo("Error", "Can't add that player to team, try again.")
                     self.user_pick_logic()
 
-            self.user_pick_made.set(True)
+            else:
+                tkMessageBox("No Selection", "Please make a selection")
+                self.user_pick_logic()
+
+        def pick_player_button(event):
+            pick_player()
 
         Label(parent, text="Recommended Player").grid(sticky="w", row=1)
         recommended_button.grid(sticky="w", row=1, column=1, columnspan=2)
@@ -271,10 +287,11 @@ class MainUI(Frame):
         
         Label(parent, text="Choose other Player").grid(sticky="w", row=3)
         other_button.grid(sticky="w", row=3, column=1)
-        other_text.grid(row=3, column=2, sticky="w")
+        other_text.grid(row=3, column=2, sticky="w", padx=5)
         
         pick_button = Button(parent, text="Pick", command=pick_player).grid(
-            row=4, columnspan=3, sticky="ne")
+            row=4, columnspan=3, sticky="ne", padx=5)
+        self.parent.bind("<Return>", pick_player_button)
         
     def __draw_recommended_list(self, parent):
         
@@ -299,7 +316,7 @@ class MainUI(Frame):
         valuable_listbox = Text(parent, height=10, width=35)
         
         Label(parent, text="List of Most Valuable Players").grid(row=1, column=4)
-        valuable_listbox.grid(row=2, column=4, rowspan=4, sticky="n")
+        valuable_listbox.grid(row=2, column=4, rowspan=4, sticky="n", padx=10)
         for player in valuable_list:
             index = str(valuable_list.index(player) + 1)
             valuable_listbox.insert("end", index + ":"
@@ -329,7 +346,7 @@ class MainUI(Frame):
         
         for key in current_team.keys():
             # player_string = "%s %s" % (key, current_team[key])
-            team_list.append("{0}{1}".format(key, current_team[key]))
+            team_list.append("{0}: {1}".format(key, current_team[key]))
         
         current_team_string = (", ".join(team_list[0:len(team_list) / 2 + 1])
                                + "\n" + ", ".join(team_list[len(team_list) / 2 + 1:]))
@@ -337,7 +354,7 @@ class MainUI(Frame):
         Label(parent, text="Current Team: ").grid(
             row=6)
         Label(parent, text=current_team_string).grid(
-            row=6, column=1, columnspan=4)
+            row=6, column=1, columnspan=4, pady=10)
 
     def __draw_opponent_teams(self, parent):
 

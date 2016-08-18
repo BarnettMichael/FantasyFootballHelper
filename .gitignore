@@ -3,3 +3,4 @@ plan.txt
 PSYCOPG2Notes.txt
 FFHelper/security.py
 security.py
+*pyc

@@ -25,12 +25,6 @@ class DraftGame(object):
             filter_position = position.rstrip('0123456789 ').upper() + '%'
             utils.create_temporary_table(position, self.temp_table_column_creators, self.connection, self.cursor)
             utils.populate_temp_table_from_other_table(position, self.temp_table_columns, "cloneplayers", "position", filter_position, self.connection, self.cursor)
-    
-    # def print_table(self, table):
-    #     utils.print_table(table)
-        
-    # def print_current_team(self):
-    #     print self.current_team
             
     def add_player_to_team(self, player):
 
@@ -41,45 +35,6 @@ class DraftGame(object):
 
         else:
             raise Exception("Couldn't add player to team")
-          
-    # def user_pick_player(self):
-    #     pickmade = False
-    #     while pickmade == False:
-    #         player = raw_input("""Choose Your Player:
-    #     1 for Best Player Available: %s
-    #     2 for Most Recommended Player: %s
-    #     Enter another player:\n-->""" % (self.get_best_player_remaining(), self.most_recommended_player_remaining()))
-    #         if player.startswith("1"):
-    #             print "%s picked\n" % self.get_best_player_remaining()
-    #             self.add_player_to_team(self.get_best_player_remaining())
-    #             utils.remove_player_from_possible_players(self.get_best_player_remaining(), self.connection, self.cursor)
-    #             pickmade = True
-    #         elif player.startswith("2"):
-    #             print "%s picked\n" % self.most_recommended_player_remaining()
-    #             self.add_player_to_team(self.most_recommended_player_remaining())
-    #             utils.remove_player_from_possible_players(self.most_recommended_player_remaining(), self.connection, self.cursor)
-    #             pickmade = True
-    #         elif utils.get_player_position(player, self.cursor) != None:
-    #             print "%s picked as user pick\n" % player
-    #             self.add_player_to_team(player)
-    #             utils.remove_player_from_possible_players(player, self.connection, self.cursor)
-    #             pickmade = True
-    #         else:
-    #             print "%s not found in database\n" % player
-    #     return pickmade
-        
-    # def opponent_pick_player(self):
-    #     pickmade = False
-    #     print "Opponent Picking"
-    #     print "If opponents picks defense, must type whole name e.g. Philadelphia Eagles"
-    #     while pickmade == False:
-    #         player = raw_input("Who did opponent pick?\n--> ")
-    #         if utils.get_player_position(player, self.cursor) != None:
-    #             utils.remove_player_from_possible_players(player, self.connection, self.cursor)
-    #             print "%s removed from available players\n" % player
-    #             pickmade = True
-    #         else:
-    #             print "%s not found in database\n" % player
             
     def check_current_team_positions(self):
         current_positions = {"QB": 0, "TE": 0,
@@ -116,7 +71,8 @@ class DraftGame(object):
     def get_possible_players_tuples(self, limit):
         """
         returns a list of tuples of player_name, weighted score and position,
-        number of elements is top (limit) from each position.
+        number of elements set by limit
+        ordered by top weighted score from each position.
         """
         assert type(limit) == str
         possible_players = []
@@ -252,6 +208,7 @@ class DraftGame(object):
     def get_list_recommended_players(self, limit):
         
         assert type(limit) == str
+
         possible_players = self.get_possible_players_tuples(limit)
        
         variance_dict = self.make_variance_dictionary(possible_players)
