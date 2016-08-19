@@ -110,7 +110,7 @@ class DraftGame(object):
         
         possible_players.sort(key=lambda t: t[1], reverse=True)
         
-        return possible_players[:int(limit) + 1]
+        return possible_players[:int(limit)]
         
     def check_current_team_needs(self):
         """need 1QB, 2RB, 2WR, 1 TE, 1 K, 1 Def, 1 Flex, 7 Bench"""
@@ -188,25 +188,14 @@ class DraftGame(object):
         return variance_dict
         
     def most_recommended_player_remaining(self):
-        
-        possible_players = self.get_possible_players_tuples("1")
-        
-        variance_dict = self.make_variance_dictionary(self.get_possible_players_tuples("5"))
-        max_variance = max(variance_dict.values())
-        best_position = ""
-
-        for position in variance_dict:
-            if variance_dict[position] == max_variance:
-                best_position = position
-                
-        for player in possible_players:
-            if utils.defense_fixer(player[2].rstrip('0123456789 ').upper()) == best_position:
-                return str(player[0])
             
-        return None
+        return self.get_list_recommended_players("5")[0][0]
         
     def get_list_recommended_players(self, limit):
-        
+        """
+        returns a list of players ordered by weighted score,
+        with the current variance of that position added to the weighted score
+        """
         assert type(limit) == str
 
         possible_players = self.get_possible_players_tuples(limit)
@@ -225,4 +214,4 @@ class DraftGame(object):
             
         recommended_players.sort(key=lambda t: t[1], reverse=True)
         
-        return recommended_players[:int(limit) + 1]
+        return recommended_players[:int(limit)]

@@ -273,7 +273,7 @@ class MainUI(Frame):
                     self.user_pick_logic()
 
             else:
-                tkMessageBox("No Selection", "Please make a selection")
+                tkMessageBox.showinfo("No Selection", "Please make a selection")
                 self.user_pick_logic()
 
         def pick_player_button(event):
@@ -302,10 +302,10 @@ class MainUI(Frame):
         recommended_listbox.grid(row=2, column=3, rowspan=4, sticky="n")
         for player in recommended_list:
             index = str(recommended_list.index(player) + 1)
-            recommended_listbox.insert("end", index + ":"
-                                       + player[0] + " "
-                                       + player[2] + " "
-                                       + format(player[1], '.2f') + "\n"
+            recommended_listbox.insert("end", "{0:>2}:{1:<20} {2} {3}\n".format(index,
+                                                                                player[0],
+                                                                                player[2],
+                                                                                format(player[1], '.0f'))
                                        )
            
         recommended_listbox.config(state="disabled")
@@ -319,12 +319,13 @@ class MainUI(Frame):
         valuable_listbox.grid(row=2, column=4, rowspan=4, sticky="n", padx=10)
         for player in valuable_list:
             index = str(valuable_list.index(player) + 1)
-            valuable_listbox.insert("end", index + ":"
-                                    + player[0] + " "
-                                    + player[2] + " "
-                                    + format(player[1], '.2f') + "\n"
+            valuable_listbox.insert("end",
+                                    "{0:>2}:{1:<20} {2} {3}\n".format(index,
+                                                                      player[0],
+                                                                      player[2],
+                                                                      format(player[1], '.0f'))
                                     )
-                
+
         valuable_listbox.config(state="disabled")
             
     def __draw_team_requirements(self, parent):

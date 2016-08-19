@@ -52,8 +52,8 @@ def get_player_from_table(player, table, cursor):
     command = "SELECT * from %s where name = \'%s\'" % (defense_fixer(table), name_fixer(player))
     cursor.execute(command)
     try:
-        playerdata = cursor.fetchall()[0]
-        return playerdata
+        player_data = cursor.fetchall()[0]
+        return player_data
     except IndexError:
         return None
     
@@ -67,10 +67,6 @@ def remove_player_from_table(player, table_name, connection, cursor):
     except:
         connection.rollback()
         raise
-
-# Functions used on Cloneplayer table specifically so as not to damage permanent database
-# Planned to be removed and functionality done by instantiating player objects in client
-# to reduce stress on database
 
 
 def get_player_position(player, cursor):
@@ -129,14 +125,14 @@ def get_player_points(player, cursor):
     cursor.execute(command)
     player_points = list(cursor.fetchall()[0])
     while None in player_points:
-        Noneindex = player_points.index(None)
-        player_points[Noneindex] = 0
+        none_index = player_points.index(None)
+        player_points[none_index] = 0
     return player_points
     
 
 def get_player_weighted_score(player, cursor):
-    pointslist = get_player_points(player, cursor)
-    weighted_score = (pointslist[0] + pointslist[1] * 0.75 + pointslist[2] * 0.5) / 3
+    points_list = get_player_points(player, cursor)
+    weighted_score = (points_list[0] + points_list[1] * 0.75 + points_list[2] * 0.5) / 3
     return weighted_score
     
 
@@ -147,7 +143,6 @@ def get_positions_list(cursor):
     position_list = []
     full_positions_list = [position for tuple in data for position in tuple]
     for position in full_positions_list:
-        positionindex = full_positions_list.index(position)
         if defense_fixer(position).rstrip('0123456789 ').upper() not in position_list:
             position_list.append(defense_fixer(position).rstrip('0123456789 ').upper())
         else:
@@ -161,11 +156,12 @@ def get_players_from_position(position, cursor):
     command = "select name from cloneplayers where position like \'%s\'" % position
     cursor.execute(command)
     data = cursor.fetchall()
-    playerslist = [player for tuple in data for player in tuple]
-    return playerslist
+    players_list = [player for tuple in data for player in tuple]
+    return players_list
 
 ###################################################################################################
     
+
 def get_top_values(table, select_columns, order_by, limit, cursor):
         """
         Gets the top value(s) of the order_by column, up to limit.
@@ -180,6 +176,7 @@ def get_top_values(table, select_columns, order_by, limit, cursor):
         data = cursor.fetchall()
         return data
         
+
 def update_column_data(table_name, column, data, filter_column, filter_value, connection, cursor):
     command = "UPDATE %s SET %s = %s WHERE %s = '%s'" % (table_name, column, data, filter_column, filter_value)
     cursor.execute(command)
@@ -189,12 +186,14 @@ def update_column_data(table_name, column, data, filter_column, filter_value, co
         connection.rollback()
         raise
     
+
 def update_weighted_scores(connection, cursor):
     for position in get_positions_list(cursor):
-        playerlist = get_players_from_position(position, cursor)
-        for player in playerlist:
+        player_list = get_players_from_position(position, cursor)
+        for player in player_list:
             update_column_data("cloneplayers", "weighted_score", str(get_player_weighted_score(player, cursor)), "name", name_fixer(player), connection, cursor)
     
+
 def create_temporary_table(table_name, column_values, connection, cursor):
     assert type(table_name) == type(column_values) == str
     command = "create temporary table %s(%s)" % (table_name, column_values)
@@ -205,15 +204,16 @@ def create_temporary_table(table_name, column_values, connection, cursor):
         connection.rollback()
         raise
 
+
 def populate_temp_table_from_other_table(target_table, target_table_columns,
-                                        other_table, filter_column,
-                                        filter_value, connection, cursor):
+                                         other_table, filter_column,
+                                         filter_value, connection, cursor):
     assert (type(target_table) == type(target_table_columns) ==
             type(other_table) == type(filter_column) ==
             type(filter_value) == str)
     command = ("insert into %s (select %s from %s where %s like \'%s\')" % 
-                  (target_table, target_table_columns, other_table,
-                   filter_column, filter_value))
+               (target_table, target_table_columns, other_table,
+                filter_column, filter_value))
     cursor.execute(command)
     
     try:
@@ -222,12 +222,14 @@ def populate_temp_table_from_other_table(target_table, target_table_columns,
         connection.rollback()
         raise
      
+
 def create_temp_clone_table(old_table, new_table, column_creators, columns, connection, cursor):
     
     create_temporary_table(new_table, column_creators, connection, cursor)
     populate_temp_table_from_other_table(new_table, columns, old_table,
                                          "'%'", "%", connection, cursor)
                                          
+
 def remove_player_from_possible_players(player, connection, cursor):
         
         position = get_player_position(player, cursor).rstrip('0123456789 ').upper()
@@ -240,6 +242,7 @@ def remove_player_from_possible_players(player, connection, cursor):
             connection.rollback()
             raise
             
+
 def clear_table(table, connection, cursor):
     command = "truncate table %s" % table
     cursor.execute(command)
